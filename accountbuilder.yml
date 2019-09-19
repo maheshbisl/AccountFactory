@@ -223,8 +223,6 @@ Resources:
           'organizationunitname': !Ref 'organizationunitname'
           'stackname' : !Ref stackname
           'stackregion' : !Ref stackregion
-          'adminusername' : !Ref adminusername
-          'adminpassword' : !Ref adminpassword
           'sourcebucket' : !Ref sourcebucket
           'baselinetemplate': !Ref baselinetemplate
           'AZ1Name' : !Ref AZ1Name
