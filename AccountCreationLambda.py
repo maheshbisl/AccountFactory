@@ -37,8 +37,8 @@ This module creates a new account using Organizations, then calls CloudFormation
 '''
 
 __version__ = '1.0'
-__author__ = '@VKK@'
-__email__ = 'vkkuchib@'
+__author__ = 'Mahesh Bisl'
+__email__ = 'bisl.mahesh@gmail.com'
 
 def get_client(service):
   client = boto3.client(service)
@@ -129,91 +129,91 @@ def delete_default_vpc(credentials,currentregion):
     print("Deleted Default VPC in {}".format(currentregion))
     return delete_vpc_response
 
-def create_custom_vpc(credentials,stackregion,AZ1Name,AZ2Name,VPCCIDR,SubnetAPublicCIDR,SubnetBPublicCIDR,SubnetAPrivateCIDR,SubnetBPrivateCIDR,VPCName):
-    #print(credentials,stackregion,AZ1Name,AZ2Name,VPCCIDR,SubnetAPublicCIDR,SubnetBPublicCIDR,SubnetAPrivateCIDR,SubnetBPrivateCIDR)
-    ec2 = boto3.client('ec2', aws_access_key_id=credentials['AccessKeyId'],
-                          aws_secret_access_key=credentials['SecretAccessKey'],
-                          aws_session_token=credentials['SessionToken'],
-                          region_name=stackregion)
+# def create_custom_vpc(credentials,stackregion,AZ1Name,AZ2Name,VPCCIDR,SubnetAPublicCIDR,SubnetBPublicCIDR,SubnetAPrivateCIDR,SubnetBPrivateCIDR,VPCName):
+#     #print(credentials,stackregion,AZ1Name,AZ2Name,VPCCIDR,SubnetAPublicCIDR,SubnetBPublicCIDR,SubnetAPrivateCIDR,SubnetBPrivateCIDR)
+#     ec2 = boto3.client('ec2', aws_access_key_id=credentials['AccessKeyId'],
+#                           aws_secret_access_key=credentials['SecretAccessKey'],
+#                           aws_session_token=credentials['SessionToken'],
+#                           region_name=stackregion)
 
-    # create VPC
-    vpc = ec2.create_vpc(CidrBlock=VPCCIDR)
-    # # we can assign a name to vpc, or any resource, by using tag
-    #vpc.create_tags(Tags=[{"Key": "Name", "Value": VPCName}])
-    # vpc.wait_until_available()
-    vpc_id = vpc['Vpc']['VpcId']
-    create_tags_response = ec2.create_tags(Resources = [vpc_id], Tags = [ {'Key' : 'Name' , 'Value' : VPCName}])
-    print("VPC ID : {}".format(vpc_id))
+#     # create VPC
+#     vpc = ec2.create_vpc(CidrBlock=VPCCIDR)
+#     # # we can assign a name to vpc, or any resource, by using tag
+#     #vpc.create_tags(Tags=[{"Key": "Name", "Value": VPCName}])
+#     # vpc.wait_until_available()
+#     vpc_id = vpc['Vpc']['VpcId']
+#     create_tags_response = ec2.create_tags(Resources = [vpc_id], Tags = [ {'Key' : 'Name' , 'Value' : VPCName}])
+#     print("VPC ID : {}".format(vpc_id))
 
-    #create an EIP for NAT Gateway
-    eipnatgwA = ec2.allocate_address(Domain='vpc')
-    eipnatgwB = ec2.allocate_address(Domain='vpc')
-    print("EIP for NatGW A : {}".format(eipnatgwA['AllocationId']))
-    print("EIP for NatGW B : {}".format(eipnatgwB['AllocationId']))
-
-
-    # create then attach internet gateway
-    ig = ec2.create_internet_gateway()
-    ig_id = ig['InternetGateway']['InternetGatewayId']
-    ec2.attach_internet_gateway(InternetGatewayId=ig_id,VpcId=vpc_id)
-    print("InternetGateway : {}".format(ig_id))
+#     #create an EIP for NAT Gateway
+#     eipnatgwA = ec2.allocate_address(Domain='vpc')
+#     eipnatgwB = ec2.allocate_address(Domain='vpc')
+#     print("EIP for NatGW A : {}".format(eipnatgwA['AllocationId']))
+#     print("EIP for NatGW B : {}".format(eipnatgwB['AllocationId']))
 
 
-    # create a route table and a public route
-    public_route_table = ec2.create_route_table(VpcId=vpc_id)
-    public_route_table_id = public_route_table['RouteTable']['RouteTableId']
-    public_route = ec2.create_route(DestinationCidrBlock='0.0.0.0/0',GatewayId=ig_id,RouteTableId=public_route_table_id)
-    print("Public Route Table ID : {}".format(public_route_table_id))
+#     # create then attach internet gateway
+#     ig = ec2.create_internet_gateway()
+#     ig_id = ig['InternetGateway']['InternetGatewayId']
+#     ec2.attach_internet_gateway(InternetGatewayId=ig_id,VpcId=vpc_id)
+#     print("InternetGateway : {}".format(ig_id))
+
+
+#     # create a route table and a public route
+#     public_route_table = ec2.create_route_table(VpcId=vpc_id)
+#     public_route_table_id = public_route_table['RouteTable']['RouteTableId']
+#     public_route = ec2.create_route(DestinationCidrBlock='0.0.0.0/0',GatewayId=ig_id,RouteTableId=public_route_table_id)
+#     print("Public Route Table ID : {}".format(public_route_table_id))
 
     
 
-    # create subnets
-    publicsubnetA = ec2.create_subnet(AvailabilityZone=AZ1Name,CidrBlock=SubnetAPublicCIDR, VpcId=vpc_id)
-    publicsubnetB = ec2.create_subnet(AvailabilityZone=AZ2Name,CidrBlock=SubnetBPublicCIDR, VpcId=vpc_id)
-    public_subnetA_id = publicsubnetA['Subnet']['SubnetId']
-    public_subnetB_id = publicsubnetB['Subnet']['SubnetId']
-    print("Public SubnetA ID : {}".format(public_subnetA_id))
-    print("Public SubnetB ID : {}".format(public_subnetB_id))
+#     # create subnets
+#     publicsubnetA = ec2.create_subnet(AvailabilityZone=AZ1Name,CidrBlock=SubnetAPublicCIDR, VpcId=vpc_id)
+#     publicsubnetB = ec2.create_subnet(AvailabilityZone=AZ2Name,CidrBlock=SubnetBPublicCIDR, VpcId=vpc_id)
+#     public_subnetA_id = publicsubnetA['Subnet']['SubnetId']
+#     public_subnetB_id = publicsubnetB['Subnet']['SubnetId']
+#     print("Public SubnetA ID : {}".format(public_subnetA_id))
+#     print("Public SubnetB ID : {}".format(public_subnetB_id))
 
-    privatesubnetA = ec2.create_subnet(AvailabilityZone=AZ1Name,CidrBlock=SubnetAPrivateCIDR, VpcId=vpc_id)
-    privatesubnetB = ec2.create_subnet(AvailabilityZone=AZ2Name,CidrBlock=SubnetBPrivateCIDR, VpcId=vpc_id)
-    private_subnetA_id = privatesubnetA['Subnet']['SubnetId']
-    private_subnetB_id = privatesubnetB['Subnet']['SubnetId']
-    print("Private SubnetA ID : {}".format(private_subnetA_id))
-    print("Private SubnetB ID : {}".format(private_subnetB_id))
+#     privatesubnetA = ec2.create_subnet(AvailabilityZone=AZ1Name,CidrBlock=SubnetAPrivateCIDR, VpcId=vpc_id)
+#     privatesubnetB = ec2.create_subnet(AvailabilityZone=AZ2Name,CidrBlock=SubnetBPrivateCIDR, VpcId=vpc_id)
+#     private_subnetA_id = privatesubnetA['Subnet']['SubnetId']
+#     private_subnetB_id = privatesubnetB['Subnet']['SubnetId']
+#     print("Private SubnetA ID : {}".format(private_subnetA_id))
+#     print("Private SubnetB ID : {}".format(private_subnetB_id))
     
 
-    # associate the route table with the subnet
-    public_route_table_associationA = ec2.associate_route_table(SubnetId=public_subnetA_id,RouteTableId=public_route_table_id)
-    public_route_table_associationB = ec2.associate_route_table(SubnetId=public_subnetB_id,RouteTableId=public_route_table_id)
-    print("Public Route Table Association ID for Subnet A : {}".format(public_route_table_associationA['AssociationId']))
-    print("Public Route Table Association ID for Subnet B : {}".format(public_route_table_associationB['AssociationId']))
+#     # associate the route table with the subnet
+#     public_route_table_associationA = ec2.associate_route_table(SubnetId=public_subnetA_id,RouteTableId=public_route_table_id)
+#     public_route_table_associationB = ec2.associate_route_table(SubnetId=public_subnetB_id,RouteTableId=public_route_table_id)
+#     print("Public Route Table Association ID for Subnet A : {}".format(public_route_table_associationA['AssociationId']))
+#     print("Public Route Table Association ID for Subnet B : {}".format(public_route_table_associationB['AssociationId']))
 
 
-    # create then attach a NAT gateway
-    ngwsubnetA = ec2.create_nat_gateway(AllocationId=eipnatgwA['AllocationId'],SubnetId=public_subnetA_id)
-    ngwsubnetB = ec2.create_nat_gateway(AllocationId=eipnatgwB['AllocationId'],SubnetId=public_subnetB_id)
-    ngwsubnetA_id = ngwsubnetA['NatGateway']['NatGatewayId']
-    ngwsubnetB_id = ngwsubnetB['NatGateway']['NatGatewayId']
-    print("NAT GW in Subnet A : {}".format(ngwsubnetA_id))
-    print("NAT GW in Subnet B : {}".format(ngwsubnetB_id))
+#     # create then attach a NAT gateway
+#     ngwsubnetA = ec2.create_nat_gateway(AllocationId=eipnatgwA['AllocationId'],SubnetId=public_subnetA_id)
+#     ngwsubnetB = ec2.create_nat_gateway(AllocationId=eipnatgwB['AllocationId'],SubnetId=public_subnetB_id)
+#     ngwsubnetA_id = ngwsubnetA['NatGateway']['NatGatewayId']
+#     ngwsubnetB_id = ngwsubnetB['NatGateway']['NatGatewayId']
+#     print("NAT GW in Subnet A : {}".format(ngwsubnetA_id))
+#     print("NAT GW in Subnet B : {}".format(ngwsubnetB_id))
 
-    time.sleep(60)
+#     time.sleep(60)
     
-    private_route_table_A = ec2.create_route_table(VpcId=vpc_id)
-    private_route_table_A_id = private_route_table_A['RouteTable']['RouteTableId']
-    private_route_A = ec2.create_route(DestinationCidrBlock='0.0.0.0/0',NatGatewayId=ngwsubnetA_id,RouteTableId=private_route_table_A_id)
-    print("Private Route Table A ID : {}".format(private_route_table_A_id))
+#     private_route_table_A = ec2.create_route_table(VpcId=vpc_id)
+#     private_route_table_A_id = private_route_table_A['RouteTable']['RouteTableId']
+#     private_route_A = ec2.create_route(DestinationCidrBlock='0.0.0.0/0',NatGatewayId=ngwsubnetA_id,RouteTableId=private_route_table_A_id)
+#     print("Private Route Table A ID : {}".format(private_route_table_A_id))
     
-    private_route_table_B = ec2.create_route_table(VpcId=vpc_id)
-    private_route_table_B_id = private_route_table_B['RouteTable']['RouteTableId']
-    private_route_B = ec2.create_route(DestinationCidrBlock='0.0.0.0/0',NatGatewayId=ngwsubnetB_id,RouteTableId=private_route_table_B_id)
-    print("Private Route Table B ID : {}".format(private_route_table_B_id))
+#     private_route_table_B = ec2.create_route_table(VpcId=vpc_id)
+#     private_route_table_B_id = private_route_table_B['RouteTable']['RouteTableId']
+#     private_route_B = ec2.create_route(DestinationCidrBlock='0.0.0.0/0',NatGatewayId=ngwsubnetB_id,RouteTableId=private_route_table_B_id)
+#     print("Private Route Table B ID : {}".format(private_route_table_B_id))
     
-    private_route_table_associationA = ec2.associate_route_table(SubnetId=private_subnetA_id,RouteTableId=private_route_table_A_id)
-    private_route_table_associationB = ec2.associate_route_table(SubnetId=private_subnetB_id,RouteTableId=private_route_table_B_id)
-    print("Private Route Table Association ID for Subnet A : {}".format(private_route_table_associationA['AssociationId']))
-    print("Private Route Table Association ID for Subnet B : {}".format(private_route_table_associationB['AssociationId']))
+#     private_route_table_associationA = ec2.associate_route_table(SubnetId=private_subnetA_id,RouteTableId=private_route_table_A_id)
+#     private_route_table_associationB = ec2.associate_route_table(SubnetId=private_subnetB_id,RouteTableId=private_route_table_B_id)
+#     print("Private Route Table Association ID for Subnet A : {}".format(private_route_table_associationA['AssociationId']))
+#     print("Private Route Table Association ID for Subnet B : {}".format(private_route_table_associationB['AssociationId']))
 
 def deploy_resources(credentials, template, stackname, stackregion, adminusername, adminpassword,account_id,newrole_arn):
 
@@ -519,10 +519,11 @@ def main(event,context):
             # print(stack)
 
             ec2_client = get_client('ec2')
-            try:
-                custom_vpc_id = create_custom_vpc(credentials,stackregion,AZ1Name,AZ2Name,VPCCIDR,SubnetAPublicCIDR,SubnetBPublicCIDR,SubnetAPrivateCIDR,SubnetBPrivateCIDR,VPCName)
-            except botocore.exceptions.ClientError as e:
-                print("There might be an error creating the custom VPC. Error : {}".format(e))
+            # try:
+            #     custom_vpc_id = create_custom_vpc(credentials,stackregion,AZ1Name,AZ2Name,VPCCIDR,SubnetAPublicCIDR,SubnetBPublicCIDR,SubnetAPrivateCIDR,SubnetBPrivateCIDR,VPCName)
+            # except botocore.exceptions.ClientError as e:
+            #     print("There might be an error creating the custom VPC. Error : {}".format(e))
+
             try:
                 newrole_arn = create_newrole(newrole,top_level_account,credentials,newrolepolicy)
             except botocore.exceptions.ClientError as e:
