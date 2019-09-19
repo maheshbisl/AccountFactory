@@ -266,7 +266,7 @@ def get_ou_name_id(root_id, organization_unit_name):
                         organization_unit_id = v1
         except botocore.exceptions.ClientError as e:
             print("Error in creating the OU: {}".format(e))
-            respond_cloudformation(event, "FAILED", {
+            respond_cloudformation({}, "FAILED", {
                                    "Message": "Could not list out AWS Organization OUs. Account creation Aborted."})
 
     else:
@@ -452,8 +452,6 @@ def main(event, context):
             respond_cloudformation(event, "SUCCESS", {"Message": "Account Created!",
                                                       "LoginURL": "https://"+account_id+".signin.aws.amazon.com/console?region="+stackregion+"#",
                                                       "AccountID": account_id,
-                                                      "Username": adminusername,
-                                                      "Role": newrole,
                                                       "Stackregion": stackregion})
         else:
             print("Cannot access the AWS Organization ROOT. Contact the master account Administrator for more details.")
