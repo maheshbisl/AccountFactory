@@ -141,7 +141,39 @@ Parameters:
     Default: 10.118.225.0/25
     Description: Enter the CIDR of the Web subnet C e.g 10.118.225.0/25
     Type: String
-
+  DHCPTemplateURL:
+    Default: https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/dhcp-options.json
+    Description: Enter DHCP options template path
+    Type: String
+  VPGTemplateURL:
+    Default: https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/vpg.json
+    Description: Enter Virtual Private Gateway template path
+    Type: String
+  PrivateNaclTemplateURL:
+    Default: https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/private-nacls.json
+    Description: Enter Private NACLs template path
+    Type: String
+  PublicNaclTemplateURL:
+    Default: https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/public-nacls.json
+    Description: Enter Public NACLs template path
+    Type: String
+  RouteTableTemplateURL:
+    Default: https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/routetables.json
+    Description: Enter Route Tables template path
+    Type: String
+  SubnetTemplateURL:
+    Default: https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/subnets.json
+    Description: Enter Subnets template path
+    Type: String
+  IGTemplateURL:
+    Default: https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/ig.json
+    Description: Enter Internet Gateway template path
+    Type: String
+  NATTemplateURL:
+    Default: https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/natg.json
+    Description: Enter NAT Gateway template path
+    Type: String
+    
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
