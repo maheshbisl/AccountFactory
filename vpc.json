@@ -1,0 +1,320 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Description": "Cloudformation Template to build VPC v2 - Satish Paudyal 17/05/2018",
+
+  "Outputs": {
+    "VpcId": {"Value": {"Ref": "VPC"}}
+  },
+
+  "Metadata" : {
+
+  "AWS::CloudFormation::Interface" : {
+    
+    "ParameterGroups" : [      
+      {
+        "Label" : { "default":"Environment" },
+        "Parameters" : ["Environment"]
+      },
+      {
+        "Label" : { "default" : "Business Unit" },
+        "Parameters" : ["BusinessUnit"]
+      },
+      {
+        "Label" : { "default" : "VPC and Subnet Configuration" },
+        "Parameters" : ["VPCCidrBlock", "PresentationSubnetACidr","PresentationSubnetBCidr","PresentationSubnetCCidr","ApplicationSubnetACidr","ApplicationSubnetBCidr","ApplicationSubnetCCidr","DataSubnetACidr","DataSubnetBCidr","DataSubnetCCidr"]
+      },
+      {
+        "Label" : { "default" : "Child Templates"},
+        "Parameters" : ["DHCPTemplateURL","VPGTemplateURL","PrivateNaclTemplateURL","PublicNaclTemplateURL","RouteTableTemplateURL","SubnetTemplateURL","IGTemplateURL","NATTemplateURL"]
+      }          
+    ],
+
+    "ParameterLabels" : {
+      "VPCCidrBlock" : { "default" : "VPC CIDR" },
+      "PresentationSubnetACidr" : { "default" : "Web A CIDR" },
+      "PresentationSubnetBCidr" : { "default" : "Web B CIDR" },
+      "PresentationSubnetCCidr" : { "default" : "Web C CIDR" },
+      "ApplicationSubnetACidr" : { "default" : "App A CIDR" },
+      "ApplicationSubnetBCidr" : { "default" : "App B CIDR" },
+      "ApplicationSubnetCCidr" : { "default" : "App C CIDR" },
+      "DataSubnetACidr" : { "default" : "Data A CIDR" },
+      "DataSubnetBCidr" : { "default" : "Data B CIDR" },
+      "DataSubnetCCidr" : { "default" : "Data C CIDR" }
+    }
+  }
+  },
+
+
+  "Parameters": {
+    "BusinessUnit" :{
+      "Default": "UNSWIT-SSS",
+      "Description": "Enter the business unit that will own the VPC e.g., finance",
+      "Type": "String"
+    },
+    "Environment": {
+      "AllowedValues": [
+        "prod",
+        "nonprod"
+      ],
+      "ConstraintDescription": "Must be one of the following prod, nonprod (lower Case)",
+      "Default": "nonprod",
+      "Description": "Enter the Environment that this VPC will hold (prod, nonprod)",
+      "Type": "String"
+    },
+    "VPCCidrBlock": {
+      "Type": "String",
+      "Default": "10.118.224.0/21",
+      "Description": "Enter the CIDR of the VPC e.g 10.118.224.0/21",
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x"
+    },
+    "ApplicationSubnetACidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x",
+      "Default": "10.118.225.128/25",
+      "Description": "Enter the CIDR of the App subnet A e.g 10.118.225.128/25",
+      "Type": "String"
+    },
+    "ApplicationSubnetBCidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x",
+      "Default": "10.118.226.0/25",
+      "Description": "Enter the CIDR of the App subnet B e.g 10.118.226.0/25",
+      "Type": "String"
+    },
+    "ApplicationSubnetCCidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x",
+      "Default": "10.118.226.128/25",
+      "Description": "Enter the CIDR of the App subnet C e.g 10.118.226.128/25",
+      "Type": "String"
+    },
+    "DataSubnetACidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x",
+      "Default": "10.118.227.0/25",
+      "Description": "Enter the CIDR of the Data Subnet A e.g 10.118.227.0/25",
+      "Type": "String"
+    },
+    "DataSubnetBCidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x",
+      "Default": "10.118.227.128/25",
+      "Description": "Enter the CIDR of the Data Subnet B e.g 10.118.227.128/25",
+      "Type": "String"
+    },
+    "DataSubnetCCidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x",
+      "Default": "10.118.228.0/25",
+      "Description": "Enter the CIDR of the Data Subnet C e.g 10.118.228.0/25",
+      "Type": "String"
+    },
+    "PresentationSubnetACidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
+      "Default": "10.118.224.0/25",
+      "Description": "Enter the CIDR of the Web Subnet A e.g 10.118.224.0/25",
+      "Type": "String"
+    },
+    "PresentationSubnetBCidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
+      "Default": "10.118.224.128/25",
+      "Description": "Enter the CIDR of the Web subnet B e.g 10.118.224.128/25",
+      "Type": "String"
+    },
+    "PresentationSubnetCCidr": {
+      "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+      "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
+      "Default": "10.118.225.0/25",
+      "Description": "Enter the CIDR of the Web subnet C e.g 10.118.225.0/25",
+      "Type": "String"
+    },
+    "DHCPTemplateURL": {
+      "Default": "https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/dhcp-options.json",
+      "Description": "Enter DHCP options template path",
+      "Type": "String"
+    },
+    "VPGTemplateURL": {
+      "Default": "https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/vpg.json",
+      "Description": "Enter Virtual Private Gateway template path",
+      "Type": "String"
+    },
+    "PrivateNaclTemplateURL": {
+      "Default": "https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/private-nacls.json",
+      "Description": "Enter Private NACLs template path",
+      "Type": "String"
+    },
+    "PublicNaclTemplateURL": {
+      "Default": "https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/public-nacls.json",
+      "Description": "Enter Public NACLs template path",
+      "Type": "String"
+    },
+    "RouteTableTemplateURL": {
+      "Default": "https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/routetables.json",
+      "Description": "Enter Route Tables template path",
+      "Type": "String"
+    },
+    "SubnetTemplateURL": {
+      "Default": "https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/subnets.json",
+      "Description": "Enter Subnets template path",
+      "Type": "String"
+    },
+    "IGTemplateURL": {
+      "Default": "https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/ig.json",
+      "Description": "Enter Internet Gateway template path",
+      "Type": "String"
+    },
+    "NATTemplateURL": {
+      "Default": "https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/natg.json",
+      "Description": "Enter NAT Gateway template path",
+      "Type": "String"
+    }
+  },
+
+  "Resources": {
+
+    "VPC": {      
+      "Type": "AWS::EC2::VPC",
+      "Properties": {        
+        "Tags" : [
+          {"Key" : "Name", "Value" : {"Fn::Join": ["-",["vpc",{"Ref": "BusinessUnit"},{"Ref": "Environment"}]]}}
+        ],
+        "CidrBlock": {"Ref": "VPCCidrBlock"}
+      }
+    },
+
+    "DHCP":{      
+      "Type" : "AWS::CloudFormation::Stack", 
+      "Properties" : {
+        "TemplateURL" : {"Ref" : "DHCPTemplateURL"},
+        "TimeoutInMinutes" : "10",
+        "Parameters" : {
+          "BusinessUnit": {"Ref": "BusinessUnit"},
+          "Environment": {"Ref": "Environment"},
+          "VpcId": {"Ref": "VPC"}
+        }       
+      }
+    },
+
+    "VirtualPrivateGateway" : {
+      "Type" : "AWS::CloudFormation::Stack", 
+      "Properties" : {
+        "TemplateURL" : {"Ref" : "VPGTemplateURL"},
+        "TimeoutInMinutes" : "10",
+        "Parameters" : {
+          "BusinessUnit": {"Ref": "BusinessUnit"},
+          "Environment": {"Ref": "Environment"},
+          "VpcId": {"Ref": "VPC"}
+        }
+      }
+    },
+
+    "PrivateNetworkAcls": {
+
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {"Ref": "PrivateNaclTemplateURL"},
+        "TimeoutInMinutes": "10",        
+        "Parameters": {
+          "BusinessUnit": {"Ref": "BusinessUnit"},
+          "Environment": {"Ref": "Environment"},
+          "VpcId": {"Ref": "VPC"}
+        }               
+      }      
+    },
+
+    "PublicNetworkAcls": {
+      
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {"Ref": "PublicNaclTemplateURL"},
+        "TimeoutInMinutes": "10",
+        "Parameters": {
+          "BusinessUnit": {"Ref": "BusinessUnit"},
+          "Environment": {"Ref": "Environment"},          
+          "VpcId": {"Ref": "VPC"}
+        }                
+      }      
+    },
+
+    "RouteTables": {
+      
+      "Type": "AWS::CloudFormation::Stack",     
+      "DependsOn" : "VirtualPrivateGateway", 
+      "Properties": {        
+        "TemplateURL": {"Ref": "RouteTableTemplateURL"},
+        "TimeoutInMinutes": "10",
+        "Parameters": {
+          "BusinessUnit": {"Ref": "BusinessUnit"},
+          "Environment": {"Ref": "Environment"},
+          "VpcId": {"Ref": "VPC"},
+          "RouteCIRDBlock": "172.26.192.0/18",
+          "VirtualPrivateGateway" : {"Fn::GetAtt": ["VirtualPrivateGateway","Outputs.VPGId"]}
+        }        
+      }      
+    },
+      
+    "Subnets": {
+
+      "Type": "AWS::CloudFormation::Stack",
+
+      "Properties": {
+        "TemplateURL": {"Ref": "SubnetTemplateURL"},
+        "TimeoutInMinutes": "10",
+        "Parameters": {
+          "BusinessUnit": {"Ref": "BusinessUnit"},
+          "Environment": {"Ref": "Environment"},
+          "PresentationSubnetACidr": {"Ref": "PresentationSubnetACidr"},
+          "PresentationSubnetBCidr": {"Ref": "PresentationSubnetBCidr"},
+          "PresentationSubnetCCidr": {"Ref": "PresentationSubnetCCidr"},
+          "ApplicationSubnetACidr": {"Ref": "ApplicationSubnetACidr"},
+          "ApplicationSubnetBCidr": {"Ref": "ApplicationSubnetBCidr"},
+          "ApplicationSubnetCCidr": {"Ref": "ApplicationSubnetCCidr"},
+          "DataSubnetACidr": {"Ref": "DataSubnetACidr"},
+          "DataSubnetBCidr": {"Ref": "DataSubnetBCidr"},
+          "DataSubnetCCidr": {"Ref": "DataSubnetCCidr"},                 
+          "PublicNetworkAcls": {"Fn::GetAtt": ["PublicNetworkAcls","Outputs.RequestedNaclId"]},
+          "PrivateNetworkAcls": {"Fn::GetAtt": ["PrivateNetworkAcls","Outputs.RequestedNaclId"]},
+          "PublicRouteTable": {"Fn::GetAtt": ["RouteTables","Outputs.PublicRouteTableId"]},
+          "PrivateRouteTable": {"Fn::GetAtt": ["RouteTables","Outputs.PrivateRouteTableId"]},          
+          "VpcId": {"Ref": "VPC"}
+        }    
+      }
+    },
+
+   "InternetGateway" : {
+
+      "Type" : "AWS::CloudFormation::Stack",
+      "Properties" : {
+      "TemplateURL" : {"Ref" : "IGTemplateURL"},
+      "TimeoutInMinutes" : "10",        
+        "Parameters" : {          
+          "BusinessUnit": {"Ref": "BusinessUnit"},
+          "Environment": {"Ref": "Environment"},
+          "VpcId": {"Ref": "VPC"},
+          "PublicRouteTableId" : {"Fn::GetAtt": ["RouteTables","Outputs.PublicRouteTableId"]}
+        }
+      }
+    },
+
+    "NATGateway" : {
+      "Type" : "AWS::CloudFormation::Stack",
+      "DependsOn" : "Subnets",      
+      "Properties" : {
+        "TemplateURL" : {"Ref" : "NATTemplateURL"},
+        "TimeoutInMinutes" : "10",        
+        "Parameters" : {
+          "WebSubnetId": {"Fn::GetAtt": ["Subnets", "Outputs.PresentationSubnetA"]},
+          "PrivateRouteTableId" : {"Fn::GetAtt": ["RouteTables","Outputs.PrivateRouteTableId"]}
+        }
+      }
+    }
+
+
+  }
+}
+
+ 
