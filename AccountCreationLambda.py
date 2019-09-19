@@ -365,22 +365,17 @@ def main(event, context):
     client = get_client('organizations')
     accountname = os.environ['accountname']
     accountemail = os.environ['accountemail']
-
-
-]
     organization_unit_name = os.environ['organizationunitname']
     accountrole = 'OrganizationAccountAccessRole'
     stackname = os.environ['stackname']
     stackregion = os.environ['stackregion']
     sourcebucket = os.environ['sourcebucket']
     baselinetemplate = os.environ['baselinetemplate']
-
-    RegiontoAZMap = {
-        "ap-southeast-2": ["ap-southeast-2a", "ap-southeast-2b", "ap-southeast-2c"]
-    }
+    access_to_billing = False
+    scp = None
 
     if (event['RequestType'] == 'Create'):
-        selfinvoke(event, 'Wait')
+        # selfinvoke(event, 'Wait')
         top_level_account = event['ServiceToken'].split(':')[4]
         org_client = get_client('organizations')
 
