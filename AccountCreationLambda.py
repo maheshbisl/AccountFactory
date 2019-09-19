@@ -140,18 +140,18 @@ def deploy_resources(credentials, template, stackname, stackregion, account_id):
             try:
                 creating_stack = False
                 variables = [
-                             'BusinessUnit',
-                             'Environment',
-                             'PresentationSubnetACidr',
-                             'PresentationSubnetBCidr',
-                             'PresentationSubnetCCidr',
-                             'ApplicationSubnetACidr',
-                             'ApplicationSubnetBCidr',
-                             'ApplicationSubnetCCidr',
-                             'DataSubnetACidr',
-                             'DataSubnetBCidr',
-                             'DataSubnetCCidr'
-                             ]
+                    'BusinessUnit',
+                    'Environment',
+                    'PresentationSubnetACidr',
+                    'PresentationSubnetBCidr',
+                    'PresentationSubnetCCidr',
+                    'ApplicationSubnetACidr',
+                    'ApplicationSubnetBCidr',
+                    'ApplicationSubnetCCidr',
+                    'DataSubnetACidr',
+                    'DataSubnetBCidr',
+                    'DataSubnetCCidr'
+                ]
 
                 parameters = []
                 for v in variables:
@@ -279,23 +279,23 @@ def get_ou_name_id(root_id, organization_unit_name):
 
 def create_newrole(newrole, top_level_account, credentials, newrolepolicy):
     iam_client = boto3.client('iam', aws_access_key_id=credentials['AccessKeyId'],
-                                  aws_secret_access_key=credentials['SecretAccessKey'],
-                                  aws_session_token=credentials['SessionToken'])
+                              aws_secret_access_key=credentials['SecretAccessKey'],
+                              aws_session_token=credentials['SessionToken'])
     print("arn:aws:iam::"+top_level_account+":root")
     trust_policy_document = json.dumps(
-                                        {
-                                          "Version": "2012-10-17",
-                                          "Statement": [
-                                            {
-                                              "Effect": "Allow",
-                                              "Principal": {
-                                                "AWS": "arn:aws:iam::"+top_level_account+":root"
-                                              },
-                                              "Action": "sts:AssumeRole"
-                                            }
-                                          ]
-                                        }
-                                    )
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": "arn:aws:iam::"+top_level_account+":root"
+                    },
+                    "Action": "sts:AssumeRole"
+                }
+            ]
+        }
+    )
     print(trust_policy_document)
     # new_role_policy = json.dumps(newrolepolicy)
     print(newrolepolicy)
@@ -385,21 +385,22 @@ def main(event, context):
             root_id = list_roots_response['Roots'][0]['Id']
         except:
             root_id = "Error"
-    
-        if root_id  is not "Error":
-            print("Creating new account: " + accountname + " (" + accountemail + ")")
 
-            # List the available AWS Oranization OU's 
+        if root_id is not "Error":
+            print("Creating new account: " +
+                  accountname + " (" + accountemail + ")")
+
+            # List the available AWS Oranization OU's
             # if(organization_unit_name is not None):
-                # (organization_unit_name,organization_unit_id) = get_ou_name_id(root_id,organization_unit_name)
-            (create_account_response,account_id) = create_account(event,accountname,accountemail,accountrole,access_to_billing,scp,root_id)
+            # (organization_unit_name,organization_unit_id) = get_ou_name_id(root_id,organization_unit_name)
+            (create_account_response, account_id) = create_account(
+                event, accountname, accountemail, accountrole, access_to_billing, scp, root_id)
             # print(create_account_response)
             print("Created acount:{}\n".format(account_id))
-            
-            
+
             # attach_policy_response = org_client.attach_policy(PolicyId=scp_id,TargetId=account_id)
             credentials = assume_role(account_id, accountrole)
-            
+
             # print("Deploying resources from " + templatefile + " as " + stackname + " in " + stackregion)
             # template = get_template(sourcebucket,baselinetemplate)
             # stack = deploy_resources(credentials, template, stackname, stackregion, adminusername, adminpassword,account_id)
@@ -407,9 +408,9 @@ def main(event, context):
 
             ec2_client = get_client('ec2')
 
-            
-            template = get_template(sourcebucket,baselinetemplate)
-            stack = deploy_resources(credentials, template, stackname, stackregion, account_id)
+            template = get_template(sourcebucket, baselinetemplate)
+            stack = deploy_resources(
+                credentials, template, stackname, stackregion, account_id)
             print(stack)
 
             print("Resources deployment for account " +
@@ -422,7 +423,7 @@ def main(event, context):
             for r in regions:
                 try:
                     # print('In the VPC deletion block - {}'.format(r))
-                    delete_vpc_response = delete_default_vpc(credentials,r)
+                    delete_vpc_response = delete_default_vpc(credentials, r)
                 except botocore.exceptions.ClientError as e:
                     print(
                         "An error occured while deleting Default VPC in {}. Error: {}".format(r, e))
@@ -448,20 +449,22 @@ def main(event, context):
                     PolicyId=scp, TargetId=account_id)
                 print("Attach policy response "+str(attach_policy_response))
             # respond_cloudformation(event, "SUCCESS", { "Message": "Account Created! URL : https://" +account_id+".signin.aws.amazon.com/console", "AccountID" : account_id, "LoginURL" : "https://console.aws.amazon.com", "Username" : adminusername })
-            respond_cloudformation(event, "SUCCESS", { "Message": "Account Created!", 
-                                                       "LoginURL" : "https://"+account_id+".signin.aws.amazon.com/console?region="+stackregion+"#", 
-                                                       "AccountID" : account_id, 
-                                                       "Username" : adminusername, 
-                                                       "Role" : newrole, 
-                                                       "Stackregion": stackregion })
+            respond_cloudformation(event, "SUCCESS", {"Message": "Account Created!",
+                                                      "LoginURL": "https://"+account_id+".signin.aws.amazon.com/console?region="+stackregion+"#",
+                                                      "AccountID": account_id,
+                                                      "Username": adminusername,
+                                                      "Role": newrole,
+                                                      "Stackregion": stackregion})
         else:
             print("Cannot access the AWS Organization ROOT. Contact the master account Administrator for more details.")
             # sys.exit(1)
-            delete_respond_cloudformation(event, "FAILED", "Cannot access the AWS Organization ROOT. Contact the master account Administrator for more details.Deleting Lambda Function.")
+            delete_respond_cloudformation(
+                event, "FAILED", "Cannot access the AWS Organization ROOT. Contact the master account Administrator for more details.Deleting Lambda Function.")
 
     if(event['RequestType'] == 'Update'):
         print("Template in Update Status")
-        respond_cloudformation(event, "SUCCESS", { "Message": "Resource update successful!" })
+        respond_cloudformation(
+            event, "SUCCESS", {"Message": "Resource update successful!"})
         # respond_cloudformation(event, "SUCCESS", { "Message": "Account Created!","Login URL : "https://" +account_id+".signin.aws.amazon.com/console", "AccountID" : account_id, "Username" : adminusername, "Role" : newrole })
 
     # elif(event['RequestType'] == 'Wait'):
