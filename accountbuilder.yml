@@ -72,6 +72,12 @@ Metadata:
         default: VPCTemplateURL
 
 Parameters:
+  accountname:
+   Description: "Account Name"
+   Type: String
+   AllowedPattern: ".+"
+   ConstraintDescription: "Account Name"
+
   accountemail:
    Description: "Account Email address"
    Type: String
@@ -141,12 +147,14 @@ Parameters:
     Default: nonprod
     Description: Enter the Environment that this VPC will hold (prod, nonprod)
     Type: String
+
   VPCCidrBlock:
     Type: String
     Default: 10.118.224.0/21
     Description: Enter the CIDR of the VPC e.g 10.118.224.0/21
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
+
   ApplicationSubnetACidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
