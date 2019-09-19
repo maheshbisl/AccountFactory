@@ -65,7 +65,7 @@ def create_account(event, accountname, accountemail, accountrole, access_to_bill
             CreateAccountRequestId=create_account_response.get('CreateAccountStatus').get('Id'))
         account_id = create_account_status_response.get(
             'CreateAccountStatus').get('AccountId')
-    #move_response = client.move_account(AccountId=account_id,SourceParentId=root_id,DestinationParentId=organization_unit_id)
+    # move_response = client.move_account(AccountId=account_id,SourceParentId=root_id,DestinationParentId=organization_unit_id)
     return(create_account_response, account_id)
 
 
@@ -81,7 +81,7 @@ def get_template(sourcebucket, baselinetemplate):
 
 
 def delete_default_vpc(credentials, currentregion):
-    #print("Default VPC deletion in progress in {}".format(currentregion))
+    # print("Default VPC deletion in progress in {}".format(currentregion))
     ec2_client = boto3.client('ec2',
                               aws_access_key_id=credentials['AccessKeyId'],
                               aws_secret_access_key=credentials['SecretAccessKey'],
@@ -103,7 +103,7 @@ def delete_default_vpc(credentials, currentregion):
         subnet_delete_response.append(ec2_client.delete_subnet(
             SubnetId=default_subnets[i], DryRun=False))
 
-    #print("Default Subnets" + currentregion + "Deleted.")
+    # print("Default Subnets" + currentregion + "Deleted.")
 
     igw_response = ec2_client.describe_internet_gateways()
     for i in range(0, len(igw_response['InternetGateways'])):
@@ -116,7 +116,7 @@ def delete_default_vpc(credentials, currentregion):
     delete_internet_gateway_response = ec2_client.delete_internet_gateway(
         InternetGatewayId=default_igw)
 
-    #print("Default IGW " + currentregion + "Deleted.")
+    # print("Default IGW " + currentregion + "Deleted.")
 
     time.sleep(10)
     delete_vpc_response = ec2_client.delete_vpc(
@@ -125,7 +125,7 @@ def delete_default_vpc(credentials, currentregion):
     return delete_vpc_response
 
 
-def deploy_resources(credentials, template, stackname, stackregion, adminusername, adminpassword, account_id, newrole_arn):
+def deploy_resources(credentials, template, stackname, stackregion, account_id):
 
     datestamp = time.strftime("%d/%m/%Y")
     client = boto3.client('cloudformation',
@@ -139,23 +139,33 @@ def deploy_resources(credentials, template, stackname, stackregion, adminusernam
         while creating_stack is True:
             try:
                 creating_stack = False
+                variables = [
+                             'BusinessUnit',
+                             'Environment',
+                             'PresentationSubnetACidr',
+                             'PresentationSubnetBCidr',
+                             'PresentationSubnetCCidr',
+                             'ApplicationSubnetACidr',
+                             'ApplicationSubnetBCidr',
+                             'ApplicationSubnetCCidr',
+                             'DataSubnetACidr',
+                             'DataSubnetBCidr',
+                             'DataSubnetCCidr'
+                             ]
+
+                parameters = []
+                for v in variables:
+                    parameters.append(
+                        {
+                            'ParameterKey': v,
+                            'ParameterValue': os.environ(v)
+                        }
+                    )
+
                 create_stack_response = client.create_stack(
                     StackName=stackname,
                     TemplateBody=template,
-                    Parameters=[
-                        {
-                            'ParameterKey': 'AdminUsername',
-                            'ParameterValue': adminusername
-                        },
-                        {
-                            'ParameterKey': 'AdminPassword',
-                            'ParameterValue': adminpassword
-                        },
-                        {
-                            'ParameterKey': 'NewRoleArn',
-                            'ParameterValue': newrole_arn
-                        }
-                    ],
+                    Parameters=parameters,
                     NotificationARNs=[],
                     Capabilities=[
                         'CAPABILITY_NAMED_IAM',
@@ -269,25 +279,25 @@ def get_ou_name_id(root_id, organization_unit_name):
 
 def create_newrole(newrole, top_level_account, credentials, newrolepolicy):
     iam_client = boto3.client('iam', aws_access_key_id=credentials['AccessKeyId'],
-                              aws_secret_access_key=credentials['SecretAccessKey'],
-                              aws_session_token=credentials['SessionToken'])
+                                  aws_secret_access_key=credentials['SecretAccessKey'],
+                                  aws_session_token=credentials['SessionToken'])
     print("arn:aws:iam::"+top_level_account+":root")
     trust_policy_document = json.dumps(
-        {
-            "Version": "2012-10-17",
-            "Statement": [
-                {
-                    "Effect": "Allow",
-                    "Principal": {
-                        "AWS": "arn:aws:iam::"+top_level_account+":root"
-                    },
-                    "Action": "sts:AssumeRole"
-                }
-            ]
-        }
-    )
+                                        {
+                                          "Version": "2012-10-17",
+                                          "Statement": [
+                                            {
+                                              "Effect": "Allow",
+                                              "Principal": {
+                                                "AWS": "arn:aws:iam::"+top_level_account+":root"
+                                              },
+                                              "Action": "sts:AssumeRole"
+                                            }
+                                          ]
+                                        }
+                                    )
     print(trust_policy_document)
-    #new_role_policy = json.dumps(newrolepolicy)
+    # new_role_policy = json.dumps(newrolepolicy)
     print(newrolepolicy)
     try:
         create_role_response = iam_client.create_role(
@@ -297,7 +307,7 @@ def create_newrole(newrole, top_level_account, credentials, newrolepolicy):
     except botocore.exceptions.ClientError as e:
         print("Error Occured in creating a role : {}", format(e))
     try:
-        #attach_policy_response = iam_client.attach_role_policy(RoleName=newrole,PolicyArn='arn:aws:iam::aws:policy/AdministratorAccess')
+        # attach_policy_response = iam_client.attach_role_policy(RoleName=newrole,PolicyArn='arn:aws:iam::aws:policy/AdministratorAccess')
         update_role_response = iam_client.put_role_policy(
             RoleName=newrole, PolicyName='NewRolePolicy', PolicyDocument=newrolepolicy)
     except botocore.exceptions.ClientError as e:
@@ -347,7 +357,7 @@ def delete_respond_cloudformation(event, status, message):
     function_name = os.environ['AWS_LAMBDA_FUNCTION_NAME']
     print('Deleting resources and rolling back the stack.')
     lambda_client.delete_function(FunctionName=function_name)
-    #requests.put(event['ResponseURL'], data=json.dumps(responseBody))
+    # requests.put(event['ResponseURL'], data=json.dumps(responseBody))
 
 
 def main(event, context):
@@ -355,45 +365,18 @@ def main(event, context):
     client = get_client('organizations')
     accountname = os.environ['accountname']
     accountemail = os.environ['accountemail']
-    newrole = os.environ['newrole']
-    newrolepolicy = os.environ['newrolepolicy']
+
+
+]
     organization_unit_name = os.environ['organizationunitname']
     accountrole = 'OrganizationAccountAccessRole'
     stackname = os.environ['stackname']
     stackregion = os.environ['stackregion']
-    adminusername = os.environ['adminusername']
-    adminpassword = os.environ['adminpassword']
     sourcebucket = os.environ['sourcebucket']
     baselinetemplate = os.environ['baselinetemplate']
-    AZ1Name = os.environ['AZ1Name']
-    AZ2Name = os.environ['AZ2Name']
-    VPCCIDR = os.environ['VPCCIDR']
-    SubnetAPublicCIDR = os.environ['SubnetAPublicCIDR']
-    SubnetBPublicCIDR = os.environ['SubnetBPublicCIDR']
-    SubnetAPrivateCIDR = os.environ['SubnetAPrivateCIDR']
-    SubnetBPrivateCIDR = os.environ['SubnetBPrivateCIDR']
-    VPCName = os.environ['VPCName']
-    access_to_billing = "DENY"
-    scp = None
-    #account_id = None
 
     RegiontoAZMap = {
-        "ap-northeast-1": ["ap-northeast-1a", "ap-northeast-1c"],
-        "ap-northeast-2": ["ap-northeast-2a", "ap-northeast-2c"],
-        "ap-northeast-3": ["ap-northeast-3a"],
-        "ap-south-1": ["ap-south-1a", "ap-south-1b"],
-        "ap-southeast-1": ["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"],
-        "ap-southeast-2": ["ap-southeast-2a", "ap-southeast-2b", "ap-southeast-2c"],
-        "ca-central-1": ["ca-central-1a", "ca-central-1b"],
-        "eu-central-1": ["eu-central-1a", "eu-central-1b", "eu-central-1c"],
-        "eu-west-1": ["eu-west-1a", "eu-west-1b", "eu-west-1c"],
-        "eu-west-2": ["eu-west-2a", "eu-west-2b", "eu-west-2c"],
-        "eu-west-3": ["eu-west-3a", "eu-west-3b", "eu-west-3c"],
-        "sa-east-1": ["sa-east-1a", "sa-east-1c"],
-        "us-east-1": ["us-east-1a", "us-east-1b", "us-east-1c", "us-east-1d", "us-east-1e", "us-east-1f"],
-        "us-east-2": ["us-east-2a", "us-east-2b", "us-east-2c"],
-        "us-west-1": ["us-west-1b", "us-west-1c"],
-        "us-west-2": ["us-west-2a", "us-west-2b", "us-west-2c"]
+        "ap-southeast-2": ["ap-southeast-2a", "ap-southeast-2b", "ap-southeast-2c"]
     }
 
     if (event['RequestType'] == 'Create'):
@@ -401,59 +384,37 @@ def main(event, context):
         top_level_account = event['ServiceToken'].split(':')[4]
         org_client = get_client('organizations')
 
-        preferred_az_list = RegiontoAZMap[stackregion]
-        if(AZ1Name in preferred_az_list and AZ2Name in preferred_az_list):
-            print("The selected AZs and the stackregion are compatible.")
-        else:
-            print("{} and {} are not in the selected stack region: {}".format(
-                AZ1Name, AZ2Name, stackregion))
-            # delete_respond_cloudformation(event, "FAILED", {
-            #                                                     #"Message":"AZ1Name: "+AZ1Name+" AZ2Name: "+AZ2Name+" is not from the selected region:"+stackregion+".Stack Regions and VPC AZ's should be in the same AWS region."})
-            #                                                      "Message" : "The selected AWS Region and AZs wont match.The AZs selected for deploying the VPC should be in the "+stackregion+".",
-            #                                                 })
-        # if(not accountname or not accountemail or not newrole or not newrolepolicy or not organization_unit_name or not stackname or not stackregion or not adminusername or not adminpassword or not sourcebucket or not baselinetemplate or not AZ1Name or not AZ2Name or not VPCCIDR or not SubnetAPublicCIDR or not SubnetBPublicCIDR or not SubnetAPrivateCIDR or not SubnetBPrivateCIDR):
-        #     print("Please provide all parameter values and try again.")
-        #     delete_respond_cloudformation(event, "FAILED", {"Message":"Provide all the parameters and launch the product again"})
         try:
             list_roots_response = org_client.list_roots()
             # print(list_roots_response)
             root_id = list_roots_response['Roots'][0]['Id']
         except:
             root_id = "Error"
+    
+        if root_id  is not "Error":
+            print("Creating new account: " + accountname + " (" + accountemail + ")")
 
-        if root_id is not "Error":
-            print("Creating new account: " +
-                  accountname + " (" + accountemail + ")")
-
-            # List the available AWS Oranization OU's
+            # List the available AWS Oranization OU's 
             # if(organization_unit_name is not None):
-            #(organization_unit_name,organization_unit_id) = get_ou_name_id(root_id,organization_unit_name)
-            (create_account_response, account_id) = create_account(
-                event, accountname, accountemail, accountrole, access_to_billing, scp, root_id)
+                # (organization_unit_name,organization_unit_id) = get_ou_name_id(root_id,organization_unit_name)
+            (create_account_response,account_id) = create_account(event,accountname,accountemail,accountrole,access_to_billing,scp,root_id)
             # print(create_account_response)
             print("Created acount:{}\n".format(account_id))
-
-            #attach_policy_response = org_client.attach_policy(PolicyId=scp_id,TargetId=account_id)
+            
+            
+            # attach_policy_response = org_client.attach_policy(PolicyId=scp_id,TargetId=account_id)
             credentials = assume_role(account_id, accountrole)
-
-            #print("Deploying resources from " + templatefile + " as " + stackname + " in " + stackregion)
+            
+            # print("Deploying resources from " + templatefile + " as " + stackname + " in " + stackregion)
             # template = get_template(sourcebucket,baselinetemplate)
             # stack = deploy_resources(credentials, template, stackname, stackregion, adminusername, adminpassword,account_id)
             # print(stack)
 
             ec2_client = get_client('ec2')
 
-            try:
-                newrole_arn = create_newrole(
-                    newrole, top_level_account, credentials, newrolepolicy)
-            except botocore.exceptions.ClientError as e:
-                print("Error creating the specified role. Error : {}".format(e))
-                newrole_arn = "arn:aws:iam::"+account_id+":role/"+newrole
-
-            print(newrole_arn)
-            template = get_template(sourcebucket, baselinetemplate)
-            stack = deploy_resources(credentials, template, stackname, stackregion,
-                                     adminusername, adminpassword, account_id, newrole_arn)
+            
+            template = get_template(sourcebucket,baselinetemplate)
+            stack = deploy_resources(credentials, template, stackname, stackregion, account_id)
             print(stack)
 
             print("Resources deployment for account " +
@@ -465,8 +426,8 @@ def main(event, context):
                 regions.append(regions_response['Regions'][i]['RegionName'])
             for r in regions:
                 try:
-                    #print('In the VPC deletion block - {}'.format(r))
-                    delete_vpc_response = delete_default_vpc(credentials, r)
+                    # print('In the VPC deletion block - {}'.format(r))
+                    delete_vpc_response = delete_default_vpc(credentials,r)
                 except botocore.exceptions.ClientError as e:
                     print(
                         "An error occured while deleting Default VPC in {}. Error: {}".format(r, e))
@@ -474,7 +435,7 @@ def main(event, context):
 
             root_id = client.list_roots().get('Roots')[0].get('Id')
             # print(root_id)
-            #print('Outside try block - {}'.format(organization_unit_name))
+            # print('Outside try block - {}'.format(organization_unit_name))
 
             if(organization_unit_name != 'None'):
                 try:
@@ -491,23 +452,21 @@ def main(event, context):
                 attach_policy_response = client.attach_policy(
                     PolicyId=scp, TargetId=account_id)
                 print("Attach policy response "+str(attach_policy_response))
-            #respond_cloudformation(event, "SUCCESS", { "Message": "Account Created! URL : https://" +account_id+".signin.aws.amazon.com/console", "AccountID" : account_id, "LoginURL" : "https://console.aws.amazon.com", "Username" : adminusername })
-            respond_cloudformation(event, "SUCCESS", {"Message": "Account Created!",
-                                                      "LoginURL": "https://"+account_id+".signin.aws.amazon.com/console?region="+stackregion+"#",
-                                                      "AccountID": account_id,
-                                                      "Username": adminusername,
-                                                      "Role": newrole,
-                                                      "Stackregion": stackregion})
+            # respond_cloudformation(event, "SUCCESS", { "Message": "Account Created! URL : https://" +account_id+".signin.aws.amazon.com/console", "AccountID" : account_id, "LoginURL" : "https://console.aws.amazon.com", "Username" : adminusername })
+            respond_cloudformation(event, "SUCCESS", { "Message": "Account Created!", 
+                                                       "LoginURL" : "https://"+account_id+".signin.aws.amazon.com/console?region="+stackregion+"#", 
+                                                       "AccountID" : account_id, 
+                                                       "Username" : adminusername, 
+                                                       "Role" : newrole, 
+                                                       "Stackregion": stackregion })
         else:
             print("Cannot access the AWS Organization ROOT. Contact the master account Administrator for more details.")
             # sys.exit(1)
-            delete_respond_cloudformation(
-                event, "FAILED", "Cannot access the AWS Organization ROOT. Contact the master account Administrator for more details.Deleting Lambda Function.")
+            delete_respond_cloudformation(event, "FAILED", "Cannot access the AWS Organization ROOT. Contact the master account Administrator for more details.Deleting Lambda Function.")
 
     if(event['RequestType'] == 'Update'):
         print("Template in Update Status")
-        respond_cloudformation(
-            event, "SUCCESS", {"Message": "Resource update successful!"})
+        respond_cloudformation(event, "SUCCESS", { "Message": "Resource update successful!" })
         # respond_cloudformation(event, "SUCCESS", { "Message": "Account Created!","Login URL : "https://" +account_id+".signin.aws.amazon.com/console", "AccountID" : account_id, "Username" : adminusername, "Role" : newrole })
 
     # elif(event['RequestType'] == 'Wait'):

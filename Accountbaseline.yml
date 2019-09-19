@@ -68,6 +68,7 @@ Parameters:
   VPCTemplateURL:
     Type: String
     Description: URL of the CloudFormation template for the VPC
+    Default: 
 
   BusinessUnit:
     Default: UNSWIT-SSS
@@ -173,7 +174,7 @@ Parameters:
     Default: https://s3-ap-southeast-2.amazonaws.com/unswit-sss-nprod-templates/workspace/natg.json
     Description: Enter NAT Gateway template path
     Type: String
-    
+
 Resources:
   VPCStack:
     Type: AWS::CloudFormation::Stack
