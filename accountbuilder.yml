@@ -1,4 +1,3 @@
-AWSTemplateFormatVersion: 2010-09-09
 Description: Account Builder Template.
 Metadata:
   'AWS::CloudFormation::Interface':
@@ -6,251 +5,47 @@ Metadata:
       - Label:
           default: Parameters for the new created account
         Parameters:
-          - accountemail
-          - organizationunitname
-          - accountname
-          - stackname
-          - stackregion
-          - sourcebucket
-          - baselinetemplate
-      - Label:
-          default: Region Configuration
-        Parameters:
-          - AZ1Name
-          - AZ2Name
-          - AZ3Name
-    ParameterGroups:
-      - Label:
-          default: VPCTemplateURL
-        Parameters:
-          - VPCTemplateURL
-    ParameterGroups:
-      - Label:
-          default: Environment
-        Parameters:
-          - Environment
-      - Label:
-          default: Business Unit
-        Parameters:
-          - BusinessUnit
-      - Label:
-          default: VPC and Subnet Configuration
-        Parameters:
-          - VPCCidrBlock
-          - PresentationSubnetACidr
-          - PresentationSubnetBCidr
-          - PresentationSubnetCCidr
-          - ApplicationSubnetACidr
-          - ApplicationSubnetBCidr
-          - ApplicationSubnetCCidr
-          - DataSubnetACidr
-          - DataSubnetBCidr
-          - DataSubnetCCidr
-
-    ParameterLabels:
-      VPCCidrBlock:
-        default: VPC CIDR
-      PresentationSubnetACidr:
-        default: Web A CIDR
-      PresentationSubnetBCidr:
-        default: Web B CIDR
-      PresentationSubnetCCidr:
-        default: Web C CIDR
-      ApplicationSubnetACidr:
-        default: App A CIDR
-      ApplicationSubnetBCidr:
-        default: App B CIDR
-      ApplicationSubnetCCidr:
-        default: App C CIDR
-      DataSubnetACidr:
-        default: Data A CIDR
-      DataSubnetBCidr:
-        default: Data B CIDR
-      DataSubnetCCidr:
-        default: Data C CIDR
-      VPCTemplateURL:
-        default: VPCTemplateURL
+          - AccountEmail
+          - AccountName
+          - LambdaSourceBucket
 
 Parameters:
-  accountname:
+  AccountName:
    Description: "Account Name"
    Type: String
    AllowedPattern: ".+"
    ConstraintDescription: "Account Name"
 
-  accountemail:
+  AccountEmail:
    Description: "Account Email address"
    Type: String
    AllowedPattern: ".+"
    ConstraintDescription: "Must provide a valid email address"
 
-  organizationunitname:
-    Description: "Name of the organization unit to which the account should be moved to."
-    Type: String
-    Default: "IT"
-    AllowedPattern: ".+"
-
-  stackname:
-    Description: "Name given to the stack deployed in the created account."
-    Type: String
-
-  stackregion:
-    Description: "Region for deploying the baseline template in the created account"
-    Default: "ap-southeast-2"
-    Type: String
-
-  sourcebucket:
+  LambdaSourceBucket:
     Description: "Bucket holding the baseline template file"
     Type: String
     Default: unsw-idcm-account-factory
-
-  baselinetemplate:
-    Description: "Baseline template to be deployed in the created account."
-    Type: String
-    Default: Accountbaseline.yml
-
-  AZ1Name:
-    Description: Availability Zone 1 Name in Region
-    Type: String
-    Default: ap-southeast-2a
-
-  AZ2Name:
-    Description: Availability Zone 2 Name in Region
-    Type: String
-    Default: ap-southeast-2b
-  
-  AZ3Name:
-    Description: Availability Zone 3 Name in Region
-    Type: String
-    Default: ap-southeast-2c
-
-  VPCTemplateURL:
-    Type: String
-    Description: URL of the CloudFormation template for the VPC
-    Default: https://unsw-idcm-account-factory.s3-ap-southeast-2.amazonaws.com/VPCTemplate/vpc.json
-
-  BusinessUnit:
-    Default: UNSWIT-IDCM
-    Description: Enter the business unit that will own the VPC e.g., finance
-    Type: String
-
-  Environment:
-    AllowedValues:
-      - prod
-      - nonprod
-    ConstraintDescription: Must be one of the following prod, nonprod (lower Case)
-    Default: nonprod
-    Description: Enter the Environment that this VPC will hold (prod, nonprod)
-    Type: String
-
-  VPCCidrBlock:
-    Type: String
-    Default: 10.118.152.0/21
-    Description: Enter the CIDR of the VPC e.g 10.118.224.0/21
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-
-  ApplicationSubnetACidr:
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.152.0/25
-    Description: Enter the CIDR of the App subnet A e.g 10.118.225.128/25
-    Type: String
-
-  ApplicationSubnetBCidr:
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.152.128/25
-    Description: Enter the CIDR of the App subnet B e.g 10.118.226.0/25
-    Type: String
-
-  ApplicationSubnetCCidr:
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.153.0/25
-    Description: Enter the CIDR of the App subnet C e.g 10.118.226.128/25
-    Type: String
-
-  DataSubnetACidr:
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.153.128/25
-    Description: Enter the CIDR of the Data Subnet A e.g 10.118.227.0/25
-    Type: String
-
-  DataSubnetBCidr:
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.154.0/25
-    Description: Enter the CIDR of the Data Subnet B e.g 10.118.227.128/25
-    Type: String
-
-  DataSubnetCCidr:
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.154.128/25
-    Description: Enter the CIDR of the Data Subnet C e.g 10.118.228.0/25
-    Type: String
-
-  PresentationSubnetACidr:
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
-    Default: 10.118.155.0/25
-    Description: Enter the CIDR of the Web Subnet A e.g 10.118.224.0/25
-    Type: String
-
-  PresentationSubnetBCidr:
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
-    Default: 10.118.155.128/25
-    Description: Enter the CIDR of the Web subnet B e.g 10.118.224.128/25
-    Type: String
-
-  PresentationSubnetCCidr:
-    AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
-    ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
-    Default: 10.118.156.0/25
-    Description: Enter the CIDR of the Web subnet C e.g 10.118.225.0/25
-    Type: String
 
 Resources:
   AccountBuilderLambda:
     Type: "AWS::Lambda::Function"
     Properties:
       Handler: "AccountCreationLambda.main"
-      FunctionName: !Sub AccountFactory-${accountname}
+      FunctionName: !Sub AccountFactory-${AccountName}
       Runtime: "python3.6"
       Role: !GetAtt LambdaExecuteRole.Arn
       Timeout: 600
       TracingConfig:
           Mode: "Active"
       Code:
-        S3Bucket: !Ref sourcebucket
+        S3Bucket: !Ref LambdaSourceBucket
         S3Key: "AccountCreationLambda.zip"
       Environment:
         Variables:
-          'accountemail' : !Ref accountemail
-          'accountname' : !Ref accountname
-          'organizationunitname': !Ref 'organizationunitname'
-          'stackname' : !Ref stackname
-          'stackregion' : !Ref stackregion
-          'sourcebucket' : !Ref sourcebucket
-          'baselinetemplate': !Ref baselinetemplate
-          'AZ1Name' : !Ref AZ1Name
-          'AZ2Name' : !Ref AZ2Name
-          'AZ3Name' : !Ref AZ3Name
-          'VPCCidrBlock' : !Ref VPCCidrBlock
-          'PresentationSubnetACidr' : !Ref PresentationSubnetACidr
-          'PresentationSubnetBCidr' : !Ref PresentationSubnetBCidr
-          'PresentationSubnetCCidr' : !Ref PresentationSubnetCCidr
-          'ApplicationSubnetACidr' : !Ref ApplicationSubnetACidr
-          'ApplicationSubnetBCidr' : !Ref ApplicationSubnetACidr
-          'ApplicationSubnetCCidr' : !Ref ApplicationSubnetACidr
-          'DataSubnetACidr' : !Ref DataSubnetACidr
-          'DataSubnetBCidr' : !Ref DataSubnetBCidr
-          'DataSubnetCCidr' : !Ref DataSubnetCCidr
-          'Environment': !Ref Environment
-          'BusinessUnit': !Ref BusinessUnit
+          'AccountEmail' : !Ref AccountEmail
+          'AccountName' : !Ref AccountName
+          'LambdaSourceBucket' : !Ref LambdaSourceBucket
 
   LambdaExecuteRole:
     Type: "AWS::IAM::Role"
@@ -283,7 +78,6 @@ Resources:
     Properties:
       ServiceToken: !GetAtt AccountBuilderLambda.Arn
 
-
 Outputs:
   Message:
     Description: Execution Status
@@ -292,6 +86,10 @@ Outputs:
   AccountID:
     Description: ID of the new account
     Value: !GetAtt 'TriggerLambda.AccountID'
+
+  AccountRole:
+    Description: The role created in the new account (use for switch role)
+    Value: !GetAtt 'TriggerLambda.AccountRole'
 
   LoginURL:
     Description: Login url
