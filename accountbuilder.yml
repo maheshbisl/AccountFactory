@@ -87,13 +87,12 @@ Parameters:
   organizationunitname:
     Description: "Name of the organization unit to which the account should be moved to."
     Type: String
-    Default: "None"
+    Default: "IT"
     AllowedPattern: ".+"
 
   stackname:
     Description: "Name given to the stack deployed in the created account."
     Type: String
-    AllowedPattern: ACCOUNT-FACTORTY-STACK
 
   stackregion:
     Description: "Region for deploying the baseline template in the created account"
@@ -108,22 +107,22 @@ Parameters:
   baselinetemplate:
     Description: "Baseline template to be deployed in the created account."
     Type: String
-    AllowedPattern: Accountbaseline.yml
+    Default: Accountbaseline.yml
 
   AZ1Name:
     Description: Availability Zone 1 Name in Region
     Type: String
-    Default: ap-southeast-1a
+    Default: ap-southeast-2a
 
   AZ2Name:
     Description: Availability Zone 2 Name in Region
     Type: String
-    Default: ap-southeast-1b
+    Default: ap-southeast-2b
   
   AZ3Name:
     Description: Availability Zone 3 Name in Region
     Type: String
-    Default: ap-southeast-1c
+    Default: ap-southeast-2c
 
   VPCTemplateURL:
     Type: String
@@ -131,7 +130,7 @@ Parameters:
     Default: https://unsw-idcm-account-factory.s3-ap-southeast-2.amazonaws.com/VPCTemplate/vpc.json
 
   BusinessUnit:
-    Default: UNSWIT-SSS
+    Default: UNSWIT-IDCM
     Description: Enter the business unit that will own the VPC e.g., finance
     Type: String
 
@@ -146,7 +145,7 @@ Parameters:
 
   VPCCidrBlock:
     Type: String
-    Default: 10.118.224.0/21
+    Default: 10.118.152.0/21
     Description: Enter the CIDR of the VPC e.g 10.118.224.0/21
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
@@ -154,63 +153,63 @@ Parameters:
   ApplicationSubnetACidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.225.128/25
+    Default: 10.118.152.0/25
     Description: Enter the CIDR of the App subnet A e.g 10.118.225.128/25
     Type: String
 
   ApplicationSubnetBCidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.226.0/25
+    Default: 10.118.152.128/25
     Description: Enter the CIDR of the App subnet B e.g 10.118.226.0/25
     Type: String
 
   ApplicationSubnetCCidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.226.128/25
+    Default: 10.118.153.0/25
     Description: Enter the CIDR of the App subnet C e.g 10.118.226.128/25
     Type: String
 
   DataSubnetACidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.227.0/25
+    Default: 10.118.153.128/25
     Description: Enter the CIDR of the Data Subnet A e.g 10.118.227.0/25
     Type: String
 
   DataSubnetBCidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.227.128/25
+    Default: 10.118.154.0/25
     Description: Enter the CIDR of the Data Subnet B e.g 10.118.227.128/25
     Type: String
 
   DataSubnetCCidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x
-    Default: 10.118.228.0/25
+    Default: 10.118.154.128/25
     Description: Enter the CIDR of the Data Subnet C e.g 10.118.228.0/25
     Type: String
 
   PresentationSubnetACidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
-    Default: 10.118.224.0/25
+    Default: 10.118.155.0/25
     Description: Enter the CIDR of the Web Subnet A e.g 10.118.224.0/25
     Type: String
 
   PresentationSubnetBCidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
-    Default: 10.118.224.128/25
+    Default: 10.118.155.128/25
     Description: Enter the CIDR of the Web subnet B e.g 10.118.224.128/25
     Type: String
 
   PresentationSubnetCCidr:
     AllowedPattern: (\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/(\d{1,2})
     ConstraintDescription: Must be a valid IP CIDR range of the form x.x.x.x/x.
-    Default: 10.118.225.0/25
+    Default: 10.118.156.0/25
     Description: Enter the CIDR of the Web subnet C e.g 10.118.225.0/25
     Type: String
 
