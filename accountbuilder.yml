@@ -218,7 +218,7 @@ Resources:
     Type: "AWS::Lambda::Function"
     Properties:
       Handler: "AccountCreationLambda.main"
-      #Handler: "index.main"
+      FunctionName: !Sub AccountFactory-${accountname}
       Runtime: "python3.6"
       Role: !GetAtt LambdaExecuteRole.Arn
       Timeout: 600
