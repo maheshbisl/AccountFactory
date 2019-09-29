@@ -25,7 +25,6 @@ Parameters:
   LambdaSourceBucket:
     Description: "Bucket holding the baseline template file"
     Type: String
-    Default: unsw-idcm-account-factory
 
 Resources:
   AccountBuilderLambda:
