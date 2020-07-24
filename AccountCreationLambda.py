@@ -18,7 +18,7 @@ This module creates a new account using Organizations
 
 __version__ = '1.0'
 __author__ = 'Mahesh Bisl'
-__email__ = 'm.bisl@unsw.edu.au'
+__email__ = 'bisl.mahesh@gmail.com'
 
 
 def create_account(event):
